@@ -220,9 +220,6 @@ def loadHelp():
 	{0}rainbowtrololo
 	{0}nyan
 	{0}nyanjazz
-	
-	
-	
 	""".format(settings["PREFIX"])
 
 youtube_dl_options = {
@@ -264,7 +261,21 @@ async def on_message(message):
 			await talk(message)
 
 		if  message.channel.id not in shush_list:
-			if message.content == client.user.name.upper() or message.content == client.user.name.upper() + "?":
+			
+			###### User Created Commands ######
+			await getAlias(message)
+			
+			if message.content.startswith(p + 'alias'):
+				await setAlias(message)
+						
+			elif message.content.startswith(p + 'command'):
+				if len(message.content) > 9:
+					message.content = message.content[9:]
+					await on_message(message)
+					
+			###### Default Commands ######		
+						
+			elif message.content == client.user.name.upper() or message.content == client.user.name.upper() + "?":
 				await client.send_message(message.channel, "`" + choice(greetings_caps) + "`")
 			elif message.content.lower() == client.user.name.lower() + "?":
 				await client.send_message(message.channel, "`" + choice(greetings) + "`")
@@ -328,7 +339,7 @@ async def on_message(message):
 			
 			elif message.content == p + 'shitpost help' or message.content == p + 'shitposts':
 				await client.send_message(message.author, shitpost_help)
-				await client.send_message(message.channel, "{} `Check your DMs for " + p +"shitpost help.`".format(message.author.mention))
+				await client.send_message(message.channel, "{} `Check your DMs for " + p +"shitpost help.`".format(message.author.mention))						
 			
 			elif message.content.startswith(p + 'aa'):
 				message.content = p + "local allahuakbar"
@@ -1786,6 +1797,43 @@ async def downloadMode(message):
 
 ############## ADMIN COMMANDS ###################
 
+
+async def setAlias(message):
+	global aliases
+	if isMemberAdmin(message):
+		if len(message.content) > 7:
+			msg = message.content[7:]
+			msgl = msg.split(" ", 1)
+			if len(msgl) > 1:
+				j = 0
+				while j < len(aliases):
+					if(msgl[0] == aliases[j]):
+						aliases[j+1] = msgl[1]
+						j = len(aliases)+4
+					else:
+						j+=2
+				if j == len(aliases):
+					aliases.append(msgl[0])
+					aliases.append(msgl[1])
+				dataIO.fileIO("json/aliases.json", "save", aliases)
+
+				
+async def getAlias(message):
+	##Not an admin command, but fits here
+	p = settings["PREFIX"]
+	global aliases
+	i = 0
+	while i < len(aliases):
+		if message.content == (p + aliases[i]):
+			i+=1
+			message.content = aliases[i]
+			await on_message(message)
+			message.content = ""
+			i = len(aliases)
+		else:
+			i+=2
+				
+				
 async def shutdown(message):
 	if isMemberAdmin(message):
 		await client.send_message(message.channel, client.user.name + " shutting down... See you soon. :hand:")
@@ -2201,7 +2249,7 @@ def console():
 			print("\n")
 
 def loadDataFromFiles(loadsettings=False):
-	global proverbs, commands, trivia_questions, badwords, badwords_regex, shush_list, twitchStreams, blacklisted_users, apis
+	global proverbs, commands, trivia_questions, badwords, badwords_regex, shush_list, twitchStreams, blacklisted_users, apis, aliases
 
 	proverbs = dataIO.loadProverbs()
 	logger.info("Loaded " + str(len(proverbs)) + " proverbs.")
@@ -2226,6 +2274,9 @@ def loadDataFromFiles(loadsettings=False):
 	
 	apis = dataIO.fileIO("json/apis.json", "load")
 	logger.info("Loaded APIs configuration.")
+	
+	aliases = dataIO.fileIO("json/aliases.json", "load")
+	logger.info("Loaded Aliases.")
 
 	if loadsettings:
 		global settings
@@ -2240,6 +2291,9 @@ def loadDataFromFiles(loadsettings=False):
 def main():
 	global ball, greetings, greetings_caps, stopwatches, trivia_sessions, message, gameSwitcher, uptime_timer, musicPlayer, currentPlaylist
 	global logger, settings, poll_sessions
+	
+	global aliases
+	
 
 	logger = loggerSetup()
 	dataIO.logger = logger

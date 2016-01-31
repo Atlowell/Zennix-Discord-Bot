@@ -1,4 +1,4 @@
-A bird in the hand is worth two in the bush
+﻿A bird in the hand is worth two in the bush
 A chain is only as strong as its weakest link
 A change is as good as a rest
 A drowning man will clutch at a straw.
@@ -45,6 +45,7 @@ Actions speak louder than words.
 Adversity makes strange bedfellows
 All good things come to he who waits
 All good things must come to an end,
+All I do is win, win, win, no matter what
 All is grist that comes to the mill
 All roads lead to Rome,
 All that glitters is not gold,
@@ -234,6 +235,7 @@ If you pay peanuts, you get monkeys
 If you steal from one author, it is plagiarism; if you steal from many, it is research.
 If you want a thing done well, do it yourself
 If you have never seen the bottom of the tree, you cannot know how tall it stands
+I'm bi-winning
 Imitation is the sincerest form of flattery
 In for a penny, in for a pound
 In the kingdom of the blind, the one eyed man is king
