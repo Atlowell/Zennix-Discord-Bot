@@ -31,7 +31,7 @@ from sys import modules
 #settings = {"PREFIX" : "!"} #prevents boot error
 
 def loadHelp():
-	global help, audio_help, meme_help, admin_help, trivia_help
+	global help, audio_help, meme_help, admin_help, trivia_help, shitpost_help
 
 	help = """**Commands list:**
 	{0}flip - Flip a coin
@@ -61,6 +61,7 @@ def loadHelp():
 	{0}audio help - Audio related commands
 	{0}economy - Economy explanation, if available
 	{0}trivia - Trivia commands and lists
+	{0}shitpost help - List of Zennix shitpost custom commands
 	""".format(settings["PREFIX"])
 
 	audio_help = """
@@ -186,6 +187,43 @@ def loadHelp():
 	{0}trivia random - Starts trivia session with random list
 	{0}trivia stop - Stop trivia session
 	""".format(settings["PREFIX"])
+	
+	
+	shitpost_help = """
+	**Zennix Shitpost Commands:**
+	{0}aa
+	{0}cookie
+	{0}rcookie
+	{0}choppin
+	{0}rchoppin
+	{0}wow
+	{0}who?
+	{0}hitler
+	{0}verynice
+	{0}kazakhstan
+	{0}kazoo
+	{0}spongebob
+	{0}bingbong
+	{0}scatman
+	{0}leeroy
+	{0}what?
+	{0}weed
+	{0}sandroll
+	{0}rickroll
+	{0}badroll
+	{0}knishes
+	{0}dontcare
+	{0}wilhelm
+	{0}mars
+	{0}jupiter
+	{0}trololo
+	{0}rainbowtrololo
+	{0}nyan
+	{0}nyanjazz
+	
+	
+	
+	""".format(settings["PREFIX"])
 
 youtube_dl_options = {
 	'format': 'bestaudio/best',
@@ -287,10 +325,28 @@ async def on_message(message):
 				await lmgtfy(message)
 			
 			############## custom commands #################
+			
+			elif message.content == p + 'shitpost help' or message.content == p + 'shitposts':
+				await client.send_message(message.author, shitpost_help)
+				await client.send_message(message.channel, "{} `Check your DMs for " + p +"shitpost help.`".format(message.author.mention))
+			
 			elif message.content.startswith(p + 'aa'):
 				message.content = p + "local allahuakbar"
 				await playLocal(message)
 				await leaveVoice()
+			elif message.content.startswith(p + 'cookie'):
+				message.content = p + "local cookie"
+				await playLocal(message)
+			elif message.content.startswith(p + 'choppin'):
+				message.content = p + "local choppin"
+				await playLocal(message)
+			elif message.content.startswith(p + 'rcookie'):
+				message.content = p + "local cookie 1"
+				await playLocal(message)
+			elif message.content.startswith(p + 'rchoppin'):
+				message.content = p + "local choppin 1"
+				await playLocal(message)
+			
 			elif message.content.startswith(p + 'wow'):
 				message.content = p +"youtube https://www.youtube.com/watch?v=lfatekN4n6Q"
 				await playVideo(message)
@@ -311,6 +367,57 @@ async def on_message(message):
 				await playVideo(message)
 			elif message.content.startswith(p + 'spongebob'):
 				message.content = p + "youtube https://www.youtube.com/watch?v=fzMJk8nGpoc"
+				await playVideo(message)
+			elif message.content.startswith(p + 'bingbong'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=oguvSPdtHQ8"
+				await playVideo(message)
+			elif message.content.startswith(p + 'scatman'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=y6oXW_YiV6g"
+				await playVideo(message)
+			elif message.content.startswith(p + 'leeroy'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=ayo3GcwOObY"
+				await playVideo(message)
+			elif message.content.startswith(p + 'what?'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=TcrP83PFtOs"
+				await playVideo(message)
+			elif message.content.startswith(p + 'weed'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=Tl7fGwLJMUI"
+				await playVideo(message)
+			elif message.content.startswith(p + 'sandroll'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=SQoA_wjmE9w"
+				await playVideo(message)
+			elif message.content.startswith(p + 'rickroll') or message.content.startswith(p + 'rr'):
+				message.content = p + "youtube https://youtu.be/oHg5SJYRHA0"
+				await playVideo(message)
+			elif message.content.startswith(p + 'badroll'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=lXMskKTw3Bc"
+				await playVideo(message)
+			elif message.content.startswith(p + 'knishes'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=IFfLCuHSZ-U"
+				await playVideo(message)
+			elif message.content.startswith(p + 'dontcare'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=2mghmk3Cs6U"
+				await playVideo(message)
+			elif message.content.startswith(p + 'wilhelm'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=9FHw2aItRlw"
+				await playVideo(message)
+			elif message.content.startswith(p + 'mars'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=L0bcRCCg01I"
+				await playVideo(message)
+			elif message.content.startswith(p + 'jupiter'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=Nz0b4STz1lo"
+				await playVideo(message)
+			elif message.content.startswith(p + 'trololo'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=zX5XasRcGBg"
+				await playVideo(message)
+			elif message.content.startswith(p + 'rainbowtrololo'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=1Wytn-_MSBo"
+				await playVideo(message)
+			elif message.content.startswith(p + 'nyan'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=QH2-TGUlwu4"
+				await playVideo(message)
+			elif message.content.startswith(p + 'nyanjazz'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=AaEmCFiNqP0"
 				await playVideo(message)
 				
 			################## music #######################
