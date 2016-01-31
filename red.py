@@ -86,7 +86,8 @@ def loadHelp():
 	{0}getplaylist - Receive the current playlist through DM. This also works with favorites.
 
 	**Local commands:**
-	{0}local [playlist_name] - Play chosen local playlist
+	{0}local [playlist_name] - Play chosen local playlist once
+	{0}local [playlist_name] [0 or 1] - Play chosen local playlist, once if 0 and repeating if 1
 	{0}locallist or {0}local or {0}locals - Local playlists' list
 
 	**Favorites:**
@@ -283,6 +284,12 @@ async def on_message(message):
 				await memes(message)
 			elif message.content.startswith (p + 'lmgtfy'):
 				await lmgtfy(message)
+			
+			############## custom commands #################
+			elif message.content.startswith (p + 'aa'):
+				message.content = p + "local allahuakbar"
+				await playLocal(message)
+			
 			################## music #######################
 			elif message.content == p + "sing":
 				await playPlaylist(message, sing=True)
@@ -687,6 +694,15 @@ class Playlist():
 				self.nextSong(self.getNextSong())
 			await asyncio.sleep(0.5)
 
+	async def songSwitcherCustom(self):
+		while not self.stop:
+			if musicPlayer.is_done() and not self.stop:
+				if self.getNextSong() == 0:
+					self.stop = True
+				else:
+					self.nextSong(self.getNextSong())
+			await asyncio.sleep(0.5)
+
 	def passedTime(self):
 		return abs(self.lastAction - int(time.perf_counter()))
 
@@ -709,6 +725,14 @@ class Playlist():
 			song = self.playlist[0]
 			self.current = 0
 			return self.current
+
+	def getNextSongCustom(self):
+		try:
+			song = self.playlist[self.current+1]
+			self.current += 1
+			return self.current
+		except: #if the current song was the last song, returns 0
+			return 0
 
 	def pause(self):
 		if musicPlayer.is_playing() and not self.stop:
@@ -1292,26 +1316,52 @@ async def playLocal(message):
 	p = settings["PREFIX"]
 	msg = message.content.split(" ")
 	if await checkVoice(message):
-		if len(msg) == 2:
+		if len(msg) == 2 or len(msg) == 3:
 			localplaylists = getLocalPlaylists()
 			if localplaylists and ("/" not in msg[1] and "\\" not in msg[1]):
 				if msg[1] in localplaylists:
-					files = []
-					if glob.glob("localtracks/" + msg[1] + "/*.mp3"):
-						files.extend(glob.glob("localtracks/" + msg[1] + "/*.mp3"))
-					if glob.glob("localtracks/" + msg[1] + "/*.flac"):
-						files.extend(glob.glob("localtracks/" + msg[1] + "/*.flac"))
-					stopMusic()
-					data = {"filename" : files, "type" : "local"}
-					currentPlaylist = Playlist(data)
-					await asyncio.sleep(2)
-					await currentPlaylist.songSwitcher()
+					if len(msg) == 2:
+						files = []
+						if glob.glob("localtracks/" + msg[1] + "/*.mp3"):
+							files.extend(glob.glob("localtracks/" + msg[1] + "/*.mp3"))
+						if glob.glob("localtracks/" + msg[1] + "/*.flac"):
+							files.extend(glob.glob("localtracks/" + msg[1] + "/*.flac"))
+						stopMusic()
+						data = {"filename" : files, "type" : "local"}
+						currentPlaylist = Playlist(data)
+						await asyncio.sleep(2)
+						await currentPlaylist.songSwitcherCustom()
+					else:
+						if msg[2] == "0":
+							files = []
+							if glob.glob("localtracks/" + msg[1] + "/*.mp3"):
+								files.extend(glob.glob("localtracks/" + msg[1] + "/*.mp3"))
+							if glob.glob("localtracks/" + msg[1] + "/*.flac"):
+								files.extend(glob.glob("localtracks/" + msg[1] + "/*.flac"))
+							stopMusic()
+							data = {"filename" : files, "type" : "local"}
+							currentPlaylist = Playlist(data)
+							await asyncio.sleep(2)
+							await currentPlaylist.songSwitcherCustom()
+						elif msg[2] == "1":
+							files = []
+							if glob.glob("localtracks/" + msg[1] + "/*.mp3"):
+								files.extend(glob.glob("localtracks/" + msg[1] + "/*.mp3"))
+							if glob.glob("localtracks/" + msg[1] + "/*.flac"):
+								files.extend(glob.glob("localtracks/" + msg[1] + "/*.flac"))
+							stopMusic()
+							data = {"filename" : files, "type" : "local"}
+							currentPlaylist = Playlist(data)
+							await asyncio.sleep(2)
+							await currentPlaylist.songSwitcher()
+						else:
+							await client.send_message(message.channel, "`" + settings["PREFIX"] + "local [playlist] {0 or 1}`")
 				else:
-					await client.send_message(message.channel, "`There is no local playlist called {}. " + p + "local or " + p + "locallist to receive the list.`".format(msg[1]))
+					await client.send_message(message.channel, "`There is no local playlist called " + msg[1] + ". " + p + "local or " + p + "locallist to receive the list.`".format(msg[1]))
 			else:
 				await client.send_message(message.channel, "`There are no valid playlists in the localtracks folder.`")
 		else:
-			await client.send_message(message.channel, "`" + settings["PREFIX"] + "local [playlist]`")
+			await client.send_message(message.channel, "`" + settings["PREFIX"] + "local [playlist] {0 or 1}`")
 
 def getLocalPlaylists():
 	dirs = []
