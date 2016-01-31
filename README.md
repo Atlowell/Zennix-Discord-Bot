@@ -1,3 +1,14 @@
+This is the Zennix version of the Red Discord Bot.
+
+Change log:
+
+Version 1.0:
+-Added Repeating and singular functionality for all playlists
+-Added commands to reflect this functionality: !local [name] {0 or 1} and !play [name] {0 or 1}
+-Miscellaneous bug fixes that were in the original
+
+
+
 # Red - A multifunction Discord bot
 #### *Fun bringer, admin helper and music bot*  
 [<img align="right" title="Art by Supergiant Games" src="https://www.supergiantgames.com/static/images/transistor/cartoon_red.png">](https://www.supergiantgames.com/games/transistor/)
