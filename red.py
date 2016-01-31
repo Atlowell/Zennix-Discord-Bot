@@ -287,10 +287,19 @@ async def on_message(message):
 				await lmgtfy(message)
 			
 			############## custom commands #################
-			elif message.content.startswith (p + 'aa'):
+			elif message.content.startswith(p + 'aa'):
 				message.content = p + "local allahuakbar"
 				await playLocal(message)
 				await leaveVoice()
+			elif message.content.startswith(p + 'wow'):
+				message.content = p +"youtube https://www.youtube.com/watch?v=lfatekN4n6Q"
+				await playVideo(message)
+			elif message.content.startswith(p + 'who?'):
+				message.content = p +"youtube https://www.youtube.com/watch?v=Uufq_PFXbpA"
+				await playVideo(message)
+			elif message.content.startswith(p + 'hitler'):
+				message.content = p +"youtube https://www.youtube.com/watch?v=EV9kyocogKo"
+				await playVideo(message)
 			
 			################## music #######################
 			elif message.content == p + "sing":
