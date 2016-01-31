@@ -300,7 +300,19 @@ async def on_message(message):
 			elif message.content.startswith(p + 'hitler'):
 				message.content = p +"youtube https://www.youtube.com/watch?v=EV9kyocogKo"
 				await playVideo(message)
-			
+			elif message.content.startswith(p + 'verynice'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=qB1TMYiXJys"
+				await playVideo(message)
+			elif message.content.startswith(p + 'kazakhstan'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=dIV-QdPEx-Q"
+				await playVideo(message)
+			elif message.content.startswith(p + 'kazoo'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=ChpmKkWBb4w"
+				await playVideo(message)
+			elif message.content.startswith(p + 'spongebob'):
+				message.content = p + "youtube https://www.youtube.com/watch?v=fzMJk8nGpoc"
+				await playVideo(message)
+				
 			################## music #######################
 			elif message.content == p + "sing":
 				await playPlaylist(message, sing=True)
