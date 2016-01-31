@@ -78,7 +78,8 @@ def loadHelp():
 	{0}downloadmode - Disables/enables download mode (admin only)
 
 	**Playlist commands:**
-	{0}play [playlist_name] - Play chosen playlist
+	{0}play [playlist_name] - Play chosen playlist once
+	{0}play [playlist_name] [0 or 1] - Play chosen playlist, once if 0 and repeating if 1
 	{0}playlists - Playlists' list
 	{0}shuffle - Mix music list
 	{0}addplaylist [name] [link] - Add a youtube playlist. Link format example: https://www.youtube.com/playlist?list=PLe8jmEHFkvsaDOOWcREvkgFoj6MD0pXXX
@@ -289,6 +290,7 @@ async def on_message(message):
 			elif message.content.startswith (p + 'aa'):
 				message.content = p + "local allahuakbar"
 				await playLocal(message)
+				await leaveVoice()
 			
 			################## music #######################
 			elif message.content == p + "sing":
@@ -308,9 +310,27 @@ async def on_message(message):
 				await listPlaylists(message)
 				await client.send_message(message.channel, "{} `Check your DMs for the playlists list.`".format(message.author.mention))
 			elif message.content == p + "skip" or message.content == p + "next":
-				if currentPlaylist: currentPlaylist.nextSong(currentPlaylist.getNextSong())
+				if currentPlaylist.stop == False:
+					if currentPlaylist.rep == False:
+						song = currentPlaylist.getNextSong()
+						if song == -1:
+							stopMusic()
+							await client.send_message(message.channel, "`There is no next song in the playlist`")
+						else:
+							currentPlaylist.nextSong(song)
+					else:
+						currentPlaylist.nextSong(currentPlaylist.getNextSongRepeat())
 			elif message.content == p + "prev" or message.content == p + "previous":
-				if currentPlaylist: currentPlaylist.nextSong(currentPlaylist.getPreviousSong())
+				if currentPlaylist.stop == False:
+					if currentPlaylist.rep == False:
+						song = currentPlaylist.getPreviousSong()
+						if song == -1:
+							stopMusic()
+							await client.send_message(message.channel, "`There is no previous song in the playlist`")
+						else:
+							currentPlaylist.nextSong(song)
+					else:
+						currentPlaylist.nextSong(currentPlaylist.getPreviousSongRepeat())
 			elif message.content == p + "repeat" or message.content == p + "replay":
 				if currentPlaylist: currentPlaylist.nextSong(currentPlaylist.current)
 			elif message.content == p + "pause":
@@ -610,6 +630,7 @@ class Playlist():
 	def __init__(self, filename=None): #a playlist with a single song is just there to make !addfavorite work with !youtube command
 		self.filename = filename
 		self.current = 0
+		self.rep = False
 		self.stop = False
 		self.lastAction = 999
 		self.currentTitle = ""
@@ -632,7 +653,7 @@ class Playlist():
 		global musicPlayer
 		if not self.passedTime() < 1 and not self.stop: #direct control
 			if musicPlayer: musicPlayer.stop()
-			self.lastAction = int(time.perf_counter())
+			self.lastAction = int(time.perf_counter())	
 			try:
 				if isPlaylistValid([self.playlist[nextTrack]]): #Checks if it's a valid youtube link
 					if settings["DOWNLOADMODE"]:
@@ -688,35 +709,26 @@ class Playlist():
 			musicPlayer = client.voice.create_ytdl_player(self.playlist[0], options=youtube_dl_options)
 			musicPlayer.start()
 
+	async def songSwitcherRepeat(self):
+		while not self.stop:
+			if musicPlayer.is_done() and not self.stop:
+				self.nextSong(self.getNextSongRepeat())
+			await asyncio.sleep(0.5)
+
 	async def songSwitcher(self):
 		while not self.stop:
 			if musicPlayer.is_done() and not self.stop:
-				self.nextSong(self.getNextSong())
-			await asyncio.sleep(0.5)
-
-	async def songSwitcherCustom(self):
-		while not self.stop:
-			if musicPlayer.is_done() and not self.stop:
-				if self.getNextSong() == 0:
+				song = self.getNextSong()
+				if song == -1:
 					self.stop = True
 				else:
-					self.nextSong(self.getNextSong())
+					self.nextSong(song)
 			await asyncio.sleep(0.5)
 
 	def passedTime(self):
 		return abs(self.lastAction - int(time.perf_counter()))
-
-	def getPreviousSong(self):
-		try:
-			song = self.playlist[self.current-1]
-			self.current -= 1
-			return self.current
-		except: #if the current song was the first song, returns the last in the playlist
-			song = self.playlist[len(self.current)-1]
-			self.current -= 1
-			return self.current
-
-	def getNextSong(self):
+		
+	def getNextSongRepeat(self):
 		try:
 			song = self.playlist[self.current+1]
 			self.current += 1
@@ -726,13 +738,31 @@ class Playlist():
 			self.current = 0
 			return self.current
 
-	def getNextSongCustom(self):
+	def getPreviousSongRepeat(self):
+		try:
+			song = self.playlist[self.current-1]
+			self.current -= 1
+			return self.current
+		except: #if the current song was the first song, returns the last in the playlist
+			song = self.playlist[len(self.playlist)-1]
+			self.current -= 1
+			return self.current
+
+	def getNextSong(self):
 		try:
 			song = self.playlist[self.current+1]
 			self.current += 1
 			return self.current
 		except: #if the current song was the last song, returns 0
-			return 0
+			return -1
+			
+	def getPreviousSong(self):
+		try:
+			song = self.playlist[self.current-1]
+			self.current -= 1
+			return self.current
+		except: #if the current song was the first song, returns 0
+			return -1
 
 	def pause(self):
 		if musicPlayer.is_playing() and not self.stop:
@@ -1276,28 +1306,58 @@ async def playPlaylist(message, sing=False):
 	msg = message.content
 	toDelete = None
 	if not sing:
-		if msg != p + "play" or msg != "play ":
+		msgs = msg.split(" ")
+		if len(msgs) == 2 or len(msgs) == 3:
 			if await checkVoice(message):
-				msg = message.content[6:]
-				if dataIO.fileIO("playlists/" + msg + ".txt", "check"):
-					stopMusic()
-					data = {"filename" : msg, "type" : "playlist"}
-					if settings["DOWNLOADMODE"]:
-						toDelete = await client.send_message(message.channel, "`I'm in download mode. It might take a bit for me to start and switch between tracks. I'll delete this message as soon as the current playlist stops.`".format(id, message.author.name))
-					currentPlaylist = Playlist(data)
-					await asyncio.sleep(2)
-					await currentPlaylist.songSwitcher()
-					if toDelete:
-						await client.delete_message(toDelete)
+				if dataIO.fileIO("playlists/" + msgs[1] + ".txt", "check"):
+					if len(msgs) == 2:
+						stopMusic()
+						data = {"filename" : msgs[1], "type" : "playlist"}
+						if settings["DOWNLOADMODE"]:
+							toDelete = await client.send_message(message.channel, "`I'm in download mode. It might take a bit for me to start and switch between tracks. I'll delete this message as soon as the current playlist stops.`".format(id, message.author.name))
+						currentPlaylist = Playlist(data)
+						currentPlaylist.rep = False
+						await asyncio.sleep(2)
+						await currentPlaylist.songSwitcher()
+						if toDelete:
+							await client.delete_message(toDelete)
+					else:
+						if msgs[2] == "0":
+							stopMusic()
+							data = {"filename" : msgs[1], "type" : "playlist"}
+							if settings["DOWNLOADMODE"]:
+								toDelete = await client.send_message(message.channel, "`I'm in download mode. It might take a bit for me to start and switch between tracks. I'll delete this message as soon as the current playlist stops.`".format(id, message.author.name))
+							currentPlaylist = Playlist(data)
+							currentPlaylist.rep = False
+							await asyncio.sleep(2)
+							await currentPlaylist.songSwitcher()
+							if toDelete:
+								await client.delete_message(toDelete)
+						elif msgs[2] == "1":
+							stopMusic()
+							data = {"filename" : msgs[1], "type" : "playlist"}
+							if settings["DOWNLOADMODE"]:
+								toDelete = await client.send_message(message.channel, "`I'm in download mode. It might take a bit for me to start and switch between tracks. I'll delete this message as soon as the current playlist stops.`".format(id, message.author.name))
+							currentPlaylist = Playlist(data)
+							currentPlaylist.rep = True
+							await asyncio.sleep(2)
+							await currentPlaylist.songSwitcherRepeat()
+							if toDelete:
+								await client.delete_message(toDelete)
+						else:
+							await client.send_message(message.channel, "`Use: !play [playlistname] {0 or 1}`")
 				else:
 					await client.send_message(message.channel, "{} `That playlist doesn't exist.`".format(message.author.mention))
+		else:
+			await client.send_message(message.channel, "`Use: !play [playlistname] {0 or 1}`")
 	else:
 		if await checkVoice(message):
 			stopMusic()
 			msg = ["Sure why not? :microphone:", "*starts singing* :microphone:", "*starts humming* :notes:"]
 			playlist = ["https://www.youtube.com/watch?v=zGTkAVsrfg8", "https://www.youtube.com/watch?v=cGMWL8cOeAU",
 						"https://www.youtube.com/watch?v=vFrjMq4aL-g", "https://www.youtube.com/watch?v=WROI5WYBU_A",
-						"https://www.youtube.com/watch?v=41tIUr_ex3g", "https://www.youtube.com/watch?v=f9O2Rjn1azc"]
+						"https://www.youtube.com/watch?v=41tIUr_ex3g", "https://www.youtube.com/watch?v=f9O2Rjn1azc",
+						"https://www.youtube.com/watch?v=f-3_pZcFjow"]
 			song = choice(playlist)
 			data = {"filename" : song, "type" : "singleSong"}
 			if settings["DOWNLOADMODE"]:
@@ -1329,8 +1389,9 @@ async def playLocal(message):
 						stopMusic()
 						data = {"filename" : files, "type" : "local"}
 						currentPlaylist = Playlist(data)
+						currentPlaylist.rep = False
 						await asyncio.sleep(2)
-						await currentPlaylist.songSwitcherCustom()
+						await currentPlaylist.songSwitcher()
 					else:
 						if msg[2] == "0":
 							files = []
@@ -1341,8 +1402,9 @@ async def playLocal(message):
 							stopMusic()
 							data = {"filename" : files, "type" : "local"}
 							currentPlaylist = Playlist(data)
+							currentPlaylist.rep = False
 							await asyncio.sleep(2)
-							await currentPlaylist.songSwitcherCustom()
+							await currentPlaylist.songSwitcher()
 						elif msg[2] == "1":
 							files = []
 							if glob.glob("localtracks/" + msg[1] + "/*.mp3"):
@@ -1352,8 +1414,9 @@ async def playLocal(message):
 							stopMusic()
 							data = {"filename" : files, "type" : "local"}
 							currentPlaylist = Playlist(data)
+							currentPlaylist.rep = True
 							await asyncio.sleep(2)
-							await currentPlaylist.songSwitcher()
+							await currentPlaylist.songSwitcherRepeat()
 						else:
 							await client.send_message(message.channel, "`" + settings["PREFIX"] + "local [playlist] {0 or 1}`")
 				else:
