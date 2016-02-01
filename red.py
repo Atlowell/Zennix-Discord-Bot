@@ -1757,6 +1757,7 @@ async def setAlias(message):
 					aliases.append(msgl[0])
 					aliases.append(msgl[1])
 				dataIO.fileIO("json/aliases.json", "save", aliases)
+				await client.send_message(message.channel, "`Added alias " + msgl[0] + "`")
 
 				
 async def getAlias(message):
@@ -1764,10 +1765,14 @@ async def getAlias(message):
 	p = settings["PREFIX"]
 	global aliases
 	i = 0
+	msg = message.content.split(" ", 1)
 	while i < len(aliases):
-		if message.content == (p + aliases[i]):
+		if msg[0] == ( p + aliases[i]):
 			i+=1
 			message.content = aliases[i]
+			if len(msg) > 1:
+				await client.send_message(message.channel, msg[1])
+				message.content = message.content + " " + msg[1]
 			await on_message(message)
 			message.content = ""
 			i = len(aliases)
