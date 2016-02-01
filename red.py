@@ -273,14 +273,15 @@ async def on_message(message):
 				await delAlias(message)
 			
 			elif message.content == (p + 'aliases'):
+				msg = "```Current Aliases: \n\n"
 				if len(aliases) > 0:
 					await client.send_message(message.channel, "{} `Check your DMs for a list of aliases`".format(message.author.mention))
-					await client.send_message(message.author, "`Current aliases:`")
-					await client.send_message(message.author, " ")
 					k = 0
 					while k < len(aliases):
-						await client.send_message(message.author, "`" + aliases[k] + " : " + aliases[k+1] + "`")
+						msg = msg + aliases[k] + " : " + aliases[k+1] + "\n"
 						k+=2
+					msg = msg + "```"
+					await client.send_message(message.author, msg)
 				else:
 					await client.send_message(message.channel, "`No current aliases`")
 			
