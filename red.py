@@ -162,6 +162,7 @@ def loadHelp():
 
 	admin_help = """
 	**Admin commands:**
+	{0}alias [name] [command] - Makes !name execute command
 	{0}addwords [word1 word2 (...)] [phrase/with/many/words] - Add words to message filter
 	{0}removewords [word1 word2 (...)] [phrase/with/many/words] - Remove words from message filter
 	{0}addregex [regex] - Add regular expression to message filter
@@ -265,13 +266,32 @@ async def on_message(message):
 			###### User Created Commands ######
 			await getAlias(message)
 			
-			if message.content.startswith(p + 'alias'):
+			if message.content.startswith(p + 'addalias'):
 				await setAlias(message)
-						
-			elif message.content.startswith(p + 'command'):
-				if len(message.content) > 9:
-					message.content = message.content[9:]
-					await on_message(message)
+			
+			elif message.content.startswith(p + 'delalias'):
+				await delAlias(message)
+			
+			elif message.content == (p + 'aliases'):
+				if len(aliases) > 0:
+					await client.send_message(message.channel, "{} `Check your DMs for a list of aliases`".format(message.author.mention))
+					await client.send_message(message.author, "`Current aliases:`")
+					await client.send_message(message.author, " ")
+					k = 0
+					while k < len(aliases):
+						await client.send_message(message.author, "`" + aliases[k] + " : " + aliases[k+1] + "`")
+						k+=2
+				else:
+					await client.send_message(message.channel, "`No current aliases`")
+			
+			elif message.content.startswith(p + 'alias'):
+				if len(message.content) > 7:
+					msg = message.content[7:]
+					if msg in aliases:
+						k = aliases.index(msg)
+						await client.send_message(message.channel, "`" + aliases[k] + " : " + aliases[k+1] + "`")
+					else:
+						await client.send_message(message.channel, "`No such alias`")
 					
 			###### Default Commands ######		
 						
@@ -337,99 +357,15 @@ async def on_message(message):
 			
 			############## custom commands #################
 			
-			elif message.content == p + 'shitpost help' or message.content == p + 'shitposts':
-				await client.send_message(message.author, shitpost_help)
-				await client.send_message(message.channel, "{} `Check your DMs for " + p +"shitpost help.`".format(message.author.mention))						
+			#elif message.content == p + 'shitpost help' or message.content == p + 'shitposts':
+			#	await client.send_message(message.author, shitpost_help)
+			#	await client.send_message(message.channel, "{} `Check your DMs for " + p +"shitpost help.`".format(message.author.mention))					
 			
 			elif message.content.startswith(p + 'aa'):
 				message.content = p + "local allahuakbar"
 				await playLocal(message)
 				await leaveVoice()
-			elif message.content.startswith(p + 'cookie'):
-				message.content = p + "local cookie"
-				await playLocal(message)
-			elif message.content.startswith(p + 'choppin'):
-				message.content = p + "local choppin"
-				await playLocal(message)
-			elif message.content.startswith(p + 'rcookie'):
-				message.content = p + "local cookie 1"
-				await playLocal(message)
-			elif message.content.startswith(p + 'rchoppin'):
-				message.content = p + "local choppin 1"
-				await playLocal(message)
 			
-			elif message.content.startswith(p + 'wow'):
-				message.content = p +"youtube https://www.youtube.com/watch?v=lfatekN4n6Q"
-				await playVideo(message)
-			elif message.content.startswith(p + 'who?'):
-				message.content = p +"youtube https://www.youtube.com/watch?v=Uufq_PFXbpA"
-				await playVideo(message)
-			elif message.content.startswith(p + 'hitler'):
-				message.content = p +"youtube https://www.youtube.com/watch?v=EV9kyocogKo"
-				await playVideo(message)
-			elif message.content.startswith(p + 'verynice'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=qB1TMYiXJys"
-				await playVideo(message)
-			elif message.content.startswith(p + 'kazakhstan'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=dIV-QdPEx-Q"
-				await playVideo(message)
-			elif message.content.startswith(p + 'kazoo'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=ChpmKkWBb4w"
-				await playVideo(message)
-			elif message.content.startswith(p + 'spongebob'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=fzMJk8nGpoc"
-				await playVideo(message)
-			elif message.content.startswith(p + 'bingbong'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=oguvSPdtHQ8"
-				await playVideo(message)
-			elif message.content.startswith(p + 'scatman'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=y6oXW_YiV6g"
-				await playVideo(message)
-			elif message.content.startswith(p + 'leeroy'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=ayo3GcwOObY"
-				await playVideo(message)
-			elif message.content.startswith(p + 'what?'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=TcrP83PFtOs"
-				await playVideo(message)
-			elif message.content.startswith(p + 'weed'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=Tl7fGwLJMUI"
-				await playVideo(message)
-			elif message.content.startswith(p + 'sandroll'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=SQoA_wjmE9w"
-				await playVideo(message)
-			elif message.content.startswith(p + 'rickroll') or message.content.startswith(p + 'rr'):
-				message.content = p + "youtube https://youtu.be/oHg5SJYRHA0"
-				await playVideo(message)
-			elif message.content.startswith(p + 'badroll'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=lXMskKTw3Bc"
-				await playVideo(message)
-			elif message.content.startswith(p + 'knishes'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=IFfLCuHSZ-U"
-				await playVideo(message)
-			elif message.content.startswith(p + 'dontcare'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=2mghmk3Cs6U"
-				await playVideo(message)
-			elif message.content.startswith(p + 'wilhelm'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=9FHw2aItRlw"
-				await playVideo(message)
-			elif message.content.startswith(p + 'mars'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=L0bcRCCg01I"
-				await playVideo(message)
-			elif message.content.startswith(p + 'jupiter'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=Nz0b4STz1lo"
-				await playVideo(message)
-			elif message.content.startswith(p + 'trololo'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=zX5XasRcGBg"
-				await playVideo(message)
-			elif message.content.startswith(p + 'rainbowtrololo'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=1Wytn-_MSBo"
-				await playVideo(message)
-			elif message.content.startswith(p + 'nyan'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=QH2-TGUlwu4"
-				await playVideo(message)
-			elif message.content.startswith(p + 'nyanjazz'):
-				message.content = p + "youtube https://www.youtube.com/watch?v=AaEmCFiNqP0"
-				await playVideo(message)
 				
 			################## music #######################
 			elif message.content == p + "sing":
@@ -1801,8 +1737,8 @@ async def downloadMode(message):
 async def setAlias(message):
 	global aliases
 	if isMemberAdmin(message):
-		if len(message.content) > 7:
-			msg = message.content[7:]
+		if len(message.content) > 10:
+			msg = message.content[10:]
 			msgl = msg.split(" ", 1)
 			if len(msgl) > 1:
 				j = 0
@@ -1832,6 +1768,21 @@ async def getAlias(message):
 			i = len(aliases)
 		else:
 			i+=2
+			
+async def delAlias(message):
+	global aliases
+	if isMemberAdmin(message):
+		if len(message.content) > 10:
+			msg = message.content[10:]
+			if msg in aliases:
+				index = aliases.index(msg)
+				del aliases[index]
+				del aliases[index]
+				await client.send_message(message.channel, "`Alias " + msg + " removed`")
+				dataIO.fileIO("json/aliases.json", "save", aliases)
+			else:
+				await client.send_message(message.channel, "`No such alias`")
+		
 				
 				
 async def shutdown(message):
