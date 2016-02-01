@@ -278,7 +278,11 @@ async def on_message(message):
 					await client.send_message(message.channel, "{} `Check your DMs for a list of aliases`".format(message.author.mention))
 					k = 0
 					while k < len(aliases):
-						msg = msg + aliases[k] + " : " + aliases[k+1] + "\n"
+						if len(msg + aliases[k] + " : " + aliases[k+1] + "\n") > 1997:
+							await client.send_message(message.author, msg + "```")
+							msg = "```" + aliases[k] + " : " + aliases[k+1] + "\n"
+						else:
+							msg = msg + aliases[k] + " : " + aliases[k+1] + "\n"
 						k+=2
 					msg = msg + "```"
 					await client.send_message(message.author, msg)
